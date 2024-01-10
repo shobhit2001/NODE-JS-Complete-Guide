@@ -72,67 +72,129 @@
 
 
 
-const http = require('http');
-const fs = require('fs');
+// const http = require('http');
+// const fs = require('fs');
 
-const server = http.createServer((req, res) => {
-  const url = req.url;
-  const method = req.method;
+// const server = http.createServer((req, res) => {
+//   const url = req.url;
+//   const method = req.method;
 
-  if (url === '/') {
-    res.write('<html>');
-    res.write('<head><title>Messages</title></head>');
-    res.write('<body>');
+//   if (url === '/') {
+//     res.write('<html>');
+//     res.write('<head><title>Messages</title></head>');
+//     res.write('<body>');
 
-    // Read messages from the file and display them
-    fs.readFile('message.txt', 'utf8', (err, data) => {
-      if (!err) {
-        const messages = data.split('\n').filter(msg => msg.trim() !== '');
-        res.write('<ul>');
-        messages.forEach(msg => {
-          res.write(`<li>${msg}</li>`);
-        });
-        res.write('</ul>');
-      }
+//     // Read messages from the file and display them
+//     fs.readFile('message.txt', 'utf8', (err, data) => {
+//       if (!err) {
+//         const messages = data.split('\n').filter(msg => msg.trim() !== '');
+//         res.write('<ul>');
+//         messages.forEach(msg => {
+//           res.write(`<li>${msg}</li>`);
+//         });
+//         res.write('</ul>');
+//       }
 
-      res.write('<form action="/message" method="POST">');
-      res.write('<input type="text" name="message"><button type="submit">Send</button>');
-      res.write('</form>');
-      res.write('</body></html>');
-      return res.end();
-    });
-  }
+//       res.write('<form action="/message" method="POST">');
+//       res.write('<input type="text" name="message"><button type="submit">Send</button>');
+//       res.write('</form>');
+//       res.write('</body></html>');
+//       return res.end();
+//     });
+//   }
 
-  if (url === '/message' && method === 'POST') {
-    const body = [];
-    req.on('data', chunk => {
-      body.push(chunk);
-    });
-    return req.on('end', () => {
-      const parsedBody = Buffer.concat(body).toString();
-      const message = parsedBody.split('=')[1];
+//   if (url === '/message' && method === 'POST') {
+//     const body = [];
+//     req.on('data', chunk => {
+//       body.push(chunk);
+//     });
+//     return req.on('end', () => {
+//       const parsedBody = Buffer.concat(body).toString();
+//       const message = parsedBody.split('=')[1];
 
-      // Read existing messages, add the new message, and write back to the file
-      fs.readFile('message.txt', 'utf8', (err, data) => {
-        const messages = data.split('\n');
-        messages.unshift(message); // Add the new message at the beginning
-        const updatedMessages = messages.filter(msg => msg.trim() !== '').join('\n');
+//       // Read existing messages, add the new message, and write back to the file
+//       fs.readFile('message.txt', 'utf8', (err, data) => {
+//         const messages = data.split('\n');
+//         messages.unshift(message); // Add the new message at the beginning
+//         const updatedMessages = messages.filter(msg => msg.trim() !== '').join('\n');
         
-        fs.writeFile('message.txt', updatedMessages, err => {
-          res.statusCode = 302;
-          res.setHeader('Location', '/');
-          return res.end();
-        });
+//         fs.writeFile('message.txt', updatedMessages, err => {
+//           res.statusCode = 302;
+//           res.setHeader('Location', '/');
+//           return res.end();
+//         });
+//       });
+//     });
+//   }
+
+//   res.setHeader('Content-Type', 'text/html');
+//   res.write('<html>');
+//   res.write('<head><title>My First Page</title></head>');
+//   res.write('<body><h1>Hello from my Node.js Server!</h1></body>');
+//   res.write('</html>');
+//   res.end();
+// });
+
+// server.listen(3000);
+
+
+
+
+
+const fs = require('fs');
+const requestHandler = (req, res) => {
+    const url = req.url;
+    const method = req.method;
+    if (url === '/') {
+        res.write('<html>');
+        res.write('<head><title>Enter Message</title><head>');
+        res.write('<body><form action="/message" method="POST"><input type="text" name="message"><button type="submit">Send</button></form></body>');
+        res.write('</html>');
+        return res.end();
       });
     });
   }
-
   res.setHeader('Content-Type', 'text/html');
   res.write('<html>');
-  res.write('<head><title>My First Page</title></head>');
+  res.write('<head><title>My First Page</title><head>');
   res.write('<body><h1>Hello from my Node.js Server!</h1></body>');
   res.write('</html>');
   res.end();
 });
+    }
+    if (url === '/message' && method === 'POST') {
+        const body = [];
+        req.on('data', chunk => {
+          console.log(chunk);
+          body.push(chunk);
+        });
+        return req.on('end', () => {
+            const parsedBody = Buffer.concat(body).toString();
+            const message = parsedBody.split('=')[1];
+            fs.writeFile('message.txt', message, err => {
+                res.statusCode = 302;
+                res.setHeader('Location', '/');
+                return res.end();
+            });
+        });
+    }
+      res.setHeader('Content-Type', 'text/html');
+      res.write('<html>');
+      res.write('<head><title>My First Page</title><head>');
+      res.write('<body><h1>Hello from my Node.js Server!</h1></body>');
+      res.write('</html>');
+      res.end();  
+};
 
-server.listen(3000);
+//module.exports = requestHandler;
+
+// module.exports = {
+//     handler: requestHandler,
+//     someText: 'Some hard coded text'
+// };
+
+// module.exports.handler = request;
+// module.exports.someText = 'Some hard coded text';
+
+exports.handler = requestHandler;
+exports.someText = 'Some hard coded text';
